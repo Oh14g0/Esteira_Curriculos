@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VaBOO - Plataforma de Empregos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+<!-- Navigation -->
+<header class="w-full bg-white shadow-sm sticky top-0 z-30">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+    <a href="#home" class="logo select-none">
+      V<span class="text-2xl font-black relative" style="top:-0.15rem;">A</span>B<span class="ring-o">O</span><sup class="exclamation">!</sup>
+    </a>
+    <nav>
+      <ul class="flex gap-10 text-gray-900 font-semibold select-none">
+        <li><a href="#home" class="nav-link active">Home</a></li>
+        <li><a href="#jobs" class="nav-link">Vagas</a></li>
+        <li><a href="#about" class="nav-link">Sobre</a></li>
+      </ul>
+    </nav>
+    <!-- Aqui vamos trocar o botão Cadastrar pelo nome do usuário quando logado -->
+    <div id="userArea">
+      <a href="{{ url_for('cadastro_empresa') }}" class="btn-primary" id="btnCadastrar">Cadastrar-se</a>
+      <!-- O nome do usuário será inserido aqui após login -->
+    </div>
+  </div>
+</header>
+
+<!-- Section: Autenticação -->
+<section id="auth" aria-label="Área de login e cadastro">
+  <div class="side-left" id="create-account-side">
+    <h2>Criar Conta</h2>
+    <div class="social-auth" aria-label="Login com redes sociais">
+      <button class="social-btn" aria-label="Facebook login" title="Facebook">f</button>
+      <button class="social-btn" aria-label="Google login" title="Google">G+</button>
+      <button class="social-btn" aria-label="LinkedIn login" title="LinkedIn">in</button>
+    </div>
+    <p class="separator-text">ou</p>
+    <form id="registerForm" aria-describedby="create-account-desc" novalidate>
+      <label for="reg-nome" aria-required="true"><span>Nome</span></label>
+      <input type="text" id="reg-nome" name="nome" placeholder="Nome" required />
+
+      <label for="reg-email" aria-required="true"><span>E-mail</span></label>
+      <input type="email" id="reg-email" name="email" placeholder="E-mail" required />
+
+      <label for="reg-telefone" aria-required="true"><span>Telefone</span></label>
+      <input type="tel" id="reg-telefone" name="telefone" placeholder="Telefone" required />
+
+      <label for="reg-linkedin" aria-required="true"><span>LinkedIn</span></label>
+      <input type="url" id="reg-linkedin" name="linkedin" placeholder="LinkedIn" required />
+
+      <label for="reg-pretensao" aria-required="true"><span>Pretensão Salarial</span></label>
+      <input type="number" id="reg-pretensao" name="pretensao_salarial" placeholder="R$" step="0.01" required />
+
+      <label for="reg-senha" aria-required="true"><span>Senha</span></label>
+      <input type="password" id="reg-senha" name="senha" placeholder="Senha" required minlength="6" />
+
+      <label for="reg-confirmar-senha" aria-required="true"><span>Confirmar Senha</span></label>
+      <input type="password" id="reg-confirmar-senha" name="confirmar_senha" placeholder="Confirmar Senha" required minlength="6" />
+
+      <button type="submit" aria-label="Criar conta">Cadastrar</button>
+    </form>
+  </div>
+
+  <div class="side-right" id="login-side" aria-live="polite" aria-atomic="true" aria-relevant="text">
+    <div role="region" aria-label="Mensagem de boas-vindas">
+      <div class="logo" aria-hidden="true" style="justify-content:center; margin-bottom:1.2rem;">
+        V<span style="top:-0.15rem; position:relative;">A</span>B<span class="ring-o">O</span><sup class="exclamation">!</sup>
+      </div>
+      <h2>Bem-Vindo<br />de Volta!</h2>
+      <p>Já possui uma conta? Faça seu login abaixo</p>
+    </div>
+    <form id="loginForm" novalidate>
+      <div class="social-auth" aria-label="Login com redes sociais">
+        <button class="social-btn" aria-label="Facebook login" title="Facebook">f</button>
+        <button class="social-btn" aria-label="Google login" title="Google">G+</button>
+        <button class="social-btn" aria-label="LinkedIn login" title="LinkedIn">in</button>
+      </div>
+      <p class="separator-text">ou</p>
+      <label for="login-email" aria-required="true">E-mail</label>
+      <input type="email" id="login-email" name="email" placeholder="E-mail" required />
+
+      <label for="login-senha" aria-required="true">Senha</label>
+      <input type="password" id="login-senha" name="senha" placeholder="Senha" required />
+
+      <button type="submit" aria-label="Fazer login">Login</button>
+    </form>
+  </div>
+</section>
+
+<script>
+  // Função que atualiza UI após login/logout
+  function updateUI() {
+    const nomeUsuario = localStorage.getItem('nome_usuario');
+    const authSection = document.getElementById('auth');
+    const userArea = document.getElementById('userArea');
+
+    if (nomeUsuario && nomeUsuario !== 'undefined') {
+      // Usuário logado:
+      // Exibir nome no topo, ocultar botão cadastrar
+      userArea.innerHTML = `
+        <span class="text-gray-800 font-semibold mr-4">Olá, ${nomeUsuario}!</span>
+        <button id="logoutBtn" class="btn-primary bg-red-600 hover:bg-red-700">Sair</button>
+      `;
+
+      // Ocultar o formulário inteiro de login/cadastro
+      authSection.style.display = 'none';
+
+      // Adicionar evento de logout
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('nome_usuario');
+        updateUI();
+      });
+    } else {
+      // Usuário não logado:
+      // Mostrar botão cadastrar, esconder nome e logout
+      userArea.innerHTML = `
+        <a href="{{ url_for('cadastro_empresa') }}" class="btn-primary" id="btnCadastrar">Cadastrar-se</a>
+      `;
+
+      // Mostrar o formulário
+      authSection.style.display = '';
+    }
+  }
+
+  // Inicializa a UI após o DOM estar carregado
+  document.addEventListener('DOMContentLoaded', () => {
+    updateUI();
+  });
+
+  // Formulário de cadastro
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+      nome: document.getElementById('reg-nome').value,
+      email: document.getElementById('reg-email').value,
+      telefone: document.getElementById('reg-telefone').value,
+      linkedin: document.getElementById('reg-linkedin').value,
+      pretensao_salarial: parseFloat(document.getElementById('reg-pretensao').value),
+      senha: document.getElementById('reg-senha').value,
+      confirmar_senha: document.getElementById('reg-confirmar-senha').value
+    };
+
+    if (data.senha !== data.confirmar_senha) {
+      alert('As senhas não coincidem!');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (response.status === 201) {
+        alert('Cadastro realizado com sucesso!');
+        document.getElementById('registerForm').reset();
+      } else {
+        alert(result.msg || 'Erro no cadastro.');
+      }
+    } catch (error) {
+      alert('Erro de conexão com servidor!');
+      console.error(error);
+    }
+  });
+
+  // Formulário de login
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('login-email').value;
+    const senha = document.getElementById('login-senha').value;
+
+    try {
+      const res = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      });
+
+      const data = await res.json();
+
+      console.log('Nome recebido do backend:', data.nome);
+
+      if (!res.ok) {
+        alert(data.msg || 'Erro no login');
+        return;
+      }
+
+      alert(data.msg);
+
+      // Salvar token e nome no localStorage só se nome válido
+      if (data.nome && data.nome !== 'undefined') {
+        localStorage.setItem('nome_usuario', data.nome);
+      } else {
+        localStorage.setItem('nome_usuario', 'Usuário');
+      }
+      localStorage.setItem('token', data.token);
+
+      // Atualizar UI para mostrar nome e esconder formulário
+      updateUI();
+
+      
+      document.getElementById('loginForm').reset();
+
+    } catch (error) {
+      alert('Erro na requisição');
+      console.error(error);
+    }
+  });
+</script>
+
+</body>
+</html>
